@@ -16,6 +16,7 @@
   - [2.3. ❤❤组合继承❤❤](#23-❤❤组合继承❤❤)
   - [2.4. 原型式继承](#24-原型式继承)
   - [2.5. ❤❤❤寄生组合式继承❤❤❤](#25-❤❤❤寄生组合式继承❤❤❤)
+  - [ES6的继承](#es6的继承)
 
 <!-- /TOC -->
 ## 0.1. 写在前面
@@ -463,3 +464,42 @@ console.log(father1.size)      //[1, 2, 3, 4]
 > `subtype1.prototype`和`subtype2.prototype`是分别通过调用`inheritPrototype`函数而得来的。而`inheritPrototype`内的`object.create`之前已经说过原理，是通过创建临时构造函数得到的，所以两次创建的临时构造函数肯定是不同的，从而获得的是两个不同的`fatherInstance`对象。  
 
 因为寄生组合式只调用了一次SuperType的构造函数，所以在保持原型链不变的同时，还能避免创造重复的属性，体现了其高效率，因此，这是普遍认为的最理想的继承方式。
+
+## ES6的继承
+按照上面用过的例子，转化为ES6就是下面的写法：
+```
+class SuperType {
+  constructor(name){
+    this.name = name;
+    this.color = ['red', 'yellow']
+  }
+  //ES6明确规定，Class内部只有静态方法，没有静态属性,所以ES6在类中定义静态属性都是错误的。
+  //size = [1,2,3]
+  sayName(){console.log(this.name)}
+}
+
+class SubType extends SuperType {
+  constructor(name, age){
+    super(name)
+    this.age = age;
+  }
+  sayAge(){console.log(this.age)}
+}
+
+var xiaohua = new SubType('xiaohua', 18)
+var xiaohong = new SuperType('xiaohong')
+xiaohua.sayName()
+xiaohua.sayAge()
+xiaohua.color.push('green')
+console.log(xiaohua.color)
+console.log(xiaohong.color)
+```
+区别：
+
+ 1. 在构建构造函数时，不再使用创建`function`的方式，取而代之的是`class`。
+ 2. ES6在构造函数中的`constructor`中定义的属性和内容，与ES5在构造函数中定义的属性和方法一样，都是私有的指针指向不重复的。
+ 3. 直接在构造函数中定义的方法，等同于ES5在原型上定义的方法，这些方法对于下级是公用的，指针指向重复的。
+ 4. 需要注意的是，ES6暂不支持在`class`内部定义属性，所以前面例子中的`size = [1,2,3]`会报错。
+ 5. 使用`extends`代替之前自己编写的`inheritPrototype`函数，从而实现原型上的方法继承。
+ 6. 在`extends`中使用`super`来实现构造函数中定义的属性和方法继承，`super()`中只需传入需要传递给父class的变量名称，实现子实例向超类型的构造函数传递参数的功能。
+
